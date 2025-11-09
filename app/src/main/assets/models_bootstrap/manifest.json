@@ -1,0 +1,13 @@
+{
+  "models": [
+    {
+      "name": "qwen2.5-1.5b-instruct",
+      "filename": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "version": "v1",
+      "size_bytes": 986048512,
+      "sha256": "8ba34ed50b012690ada1bc1652c401a6382080b2d9a86a962c351e41af65b488",
+      "quant": "Q4_K_M",
+      "n_ctx_hint": 1024
+    }
+  ]
+}
