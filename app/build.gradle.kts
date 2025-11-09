@@ -26,6 +26,7 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
+            arguments += listOf("-DANDROID_STL=c++_shared")
         }
     }
 
