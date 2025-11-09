@@ -21,6 +21,7 @@ set_target_properties(ggml PROPERTIES
 
 find_library(log_lib log REQUIRED)
 find_library(cpp_shared c++_shared REQUIRED)
+find_library(omp_lib omp REQUIRED)
 
 target_include_directories(llamabridge PRIVATE
         ${CMAKE_SOURCE_DIR}/third_party/llama
@@ -33,4 +34,5 @@ target_link_libraries(llamabridge
         ggml
         ${cpp_shared}
         ${log_lib}
+        ${omp_lib}
 )
