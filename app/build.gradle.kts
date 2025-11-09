@@ -20,13 +20,18 @@ android {
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
+
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_STL=c++_shared")
+            }
+        }
     }
 
     // Chỉ khai báo đường dẫn CMake – phần này ổn định
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            arguments += listOf("-DANDROID_STL=c++_shared")
         }
     }
 
