@@ -5,43 +5,42 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 
-# ✅ Thêm đúng file vào target (nếu sai tên/đường dẫn, IDE sẽ báo "not part of project")
 add_library(llamabridge SHARED
         ${CMAKE_SOURCE_DIR}/llamabridge.cpp
 )
 
-# ✅ Import libllama.so theo ABI đang build
+# prebuilt libs trong jniLibs/${ANDROID_ABI}
 add_library(llama SHARED IMPORTED)
 set_target_properties(llama PROPERTIES
-        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libllama.so"
-)
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libllama.so")
 
-# IMPORT ggml (giống cách bạn import llama)
 add_library(ggml SHARED IMPORTED)
 set_target_properties(ggml PROPERTIES
-        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libggml.so"
-)
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libggml.so")
 
-# Link JNI shim -> llama + ggml + log
-target_link_libraries(llamabridge PRIVATE llama ggml ${log-lib})
-
-
-# ✅ Include path tới headers bạn đã copy
 include_directories(
         ${CMAKE_SOURCE_DIR}/third_party/llama
         ${CMAKE_SOURCE_DIR}/third_party/llama/ggml/include
 )
 
-# Android log
 find_library(log-lib log)
 
-find_library(cpp_shared c++_shared REQUIRED)
+# --- STL động: chọn target khả dụng theo NDK ---
+set(STL_TGT "")
+if (TARGET NDK::c++_shared)
+    set(STL_TGT NDK::c++_shared)
+elseif (TARGET c++_shared)
+    set(STL_TGT c++_shared)
+else()
+    find_library(CPP_SHARED_LIB NAMES c++_shared REQUIRED)
+    set(STL_TGT ${CPP_SHARED_LIB})
+endif()
 
-# Link JNI shim -> llama + log
-target_link_libraries(llamabridge
-        PRIVATE
-        llama
-        ggml
-        c++_shared      # <-- quan trọng
-        ${log-lib}
-)
+# (Tùy chọn, gợi ý toolchain dùng STL động)
+set(CMAKE_ANDROID_STL_TYPE c++_shared)
+
+# Link JNI shim -> llama + ggml + STL + log
+target_link_libraries(llamabridge PRIVATE llama ggml ${STL_TGT} ${log-lib})
+
+# Debug CMake: in ra STL_TGT đã chọn
+message(STATUS "Using STL target: ${STL_TGT}")
