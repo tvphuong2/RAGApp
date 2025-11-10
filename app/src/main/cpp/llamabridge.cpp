@@ -489,7 +489,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_example_ragapp_LlamaBridge_cancel(
         JNIEnv*, jclass /*clazz*/) {
     g_cancel_requested.store(true);
-    if (g_ctx) {
-        llama_reset_logits(g_ctx);
+    if (g_smpl) {
+        llama_sampler_reset(g_smpl);
     }
 }
