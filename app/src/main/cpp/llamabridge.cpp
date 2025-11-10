@@ -305,7 +305,7 @@ Java_com_example_ragapp_LlamaBridge_infer(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_example_ragapp_LlamaBridge_infer_1streaming(
+Java_com_example_ragapp_LlamaBridge_inferStreaming(
         JNIEnv* env, jclass /*clazz*/,
         jstring jPrompt, jint maxTokens, jfloat temp, jfloat topP, jobject jCallback) {
 
