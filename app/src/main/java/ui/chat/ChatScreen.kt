@@ -59,7 +59,7 @@ fun ChatScreen(
         modifier = modifier
             .fillMaxSize()
             .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
             )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -188,7 +188,7 @@ private fun InputBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
             .imePadding(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -205,7 +205,8 @@ private fun InputBar(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
             Spacer(Modifier.width(12.dp))
