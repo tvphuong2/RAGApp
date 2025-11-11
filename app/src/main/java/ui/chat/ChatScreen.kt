@@ -6,22 +6,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +58,9 @@ fun ChatScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .systemBarsPadding()
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+            )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -178,14 +185,28 @@ private fun InputBar(
     isModelReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = input,
                 onValueChange = onInputChange,
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Nhập câu hỏi...") },
-                enabled = isModelReady
+                enabled = isModelReady,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
             Spacer(Modifier.width(12.dp))
             val buttonLabel = if (isGenerating) "Dừng" else "Gửi"
@@ -197,7 +218,12 @@ private fun InputBar(
                     contentColor = MaterialTheme.colorScheme.onError
                 )
             } else {
-                ButtonDefaults.buttonColors()
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                )
             }
 
             Button(onClick = onClick, enabled = buttonEnabled, colors = buttonColors) {
