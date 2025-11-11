@@ -16,7 +16,9 @@ data class MessageUi(
     val id: Long,          // key ổn định cho LazyColumn (tránh nhảy layout)
     val author: Author,    // USER hay BOT
     val text: String,      // nội dung hiển thị
-    val timestampMs: Long  // thời gian tạo (có thể dùng để sort/format)
+    val timestampMs: Long, // thời gian tạo (có thể dùng để sort/format)
+    val firstTokenLatencyMs: Long? = null, // độ trễ tới token đầu tiên (ms)
+    val tokensPerSecond: Double? = null    // tốc độ tạo token (token/giây)
 )
 
 // Toàn bộ trạng thái cần cho màn hình chat

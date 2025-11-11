@@ -89,16 +89,30 @@ class ChatViewModel(
         }
 
         streamingJob = viewModelScope.launch {
+            val generationStartTime = System.currentTimeMillis()
+            var firstTokenTime: Long? = null
+            var tokenCount = 0
             var finished = false
             try {
                 streamCompletion(prompt, preset).collect { event ->
                     when (event) {
                         is StreamEvent.Token -> {
+                            tokenCount++
+                            val firstLatency = if (firstTokenTime == null) {
+                                val now = System.currentTimeMillis()
+                                firstTokenTime = now
+                                now - generationStartTime
+                            } else {
+                                null
+                            }
                             _uiState.update { current ->
                                 current.copy(
                                     messages = current.messages.map { message ->
                                         if (message.id == botId) {
-                                            message.copy(text = message.text + event.text)
+                                            message.copy(
+                                                text = message.text + event.text,
+                                                firstTokenLatencyMs = message.firstTokenLatencyMs ?: firstLatency
+                                            )
                                         } else {
                                             message
                                         }
@@ -119,8 +133,21 @@ class ChatViewModel(
 
                         StreamEvent.Completed -> {
                             finished = true
+                            val tokensPerSecond = if (firstTokenTime != null && tokenCount > 0) {
+                                val durationMs = (System.currentTimeMillis() - firstTokenTime!!).coerceAtLeast(1)
+                                tokenCount * 1000.0 / durationMs
+                            } else {
+                                null
+                            }
                             _uiState.update { current ->
                                 current.copy(
+                                    messages = current.messages.map { message ->
+                                        if (message.id == botId) {
+                                            message.copy(tokensPerSecond = tokensPerSecond)
+                                        } else {
+                                            message
+                                        }
+                                    },
                                     isGenerating = false,
                                     statusMessage = null
                                 )
