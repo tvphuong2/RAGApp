@@ -29,9 +29,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,29 +59,44 @@ fun ChatScreen(
         }
     }
 
-    Column(
+    val density = LocalDensity.current
+    var composerHeightPx by remember { mutableStateOf(0) }
+    val composerBottomSpacing = 12.dp
+    val composerHeightDp = with(density) { composerHeightPx.toDp() }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PresetSelector(
-            presets = uiState.presets,
-            selected = uiState.selectedPreset,
-            onSelect = viewModel::onPresetSelected
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 12.dp,
+                    bottom = composerBottomSpacing + composerHeightDp
+                ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            PresetSelector(
+                presets = uiState.presets,
+                selected = uiState.selectedPreset,
+                onSelect = viewModel::onPresetSelected
+            )
 
-        StatusHeader(
-            isModelReady = uiState.isModelReady,
-            statusMessage = uiState.statusMessage
-        )
+            StatusHeader(
+                isModelReady = uiState.isModelReady,
+                statusMessage = uiState.statusMessage
+            )
 
-        ChatHistory(
-            messages = uiState.messages,
-            listState = listState,
-            modifier = Modifier.weight(1f)
-        )
+            ChatHistory(
+                messages = uiState.messages,
+                listState = listState,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         InputBar(
             input = uiState.input,
@@ -85,7 +105,16 @@ fun ChatScreen(
             onStop = viewModel::stopGeneration,
             canSend = uiState.input.isNotBlank() && uiState.isModelReady && !uiState.isGenerating,
             isGenerating = uiState.isGenerating,
-            isModelReady = uiState.isModelReady
+            isModelReady = uiState.isModelReady,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .navigationBarsPadding()
+                .imePadding()
+                .onGloballyPositioned { layoutCoordinates ->
+                    composerHeightPx = layoutCoordinates.size.height
+                }
         )
     }
 }
@@ -183,10 +212,7 @@ private fun InputBar(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .imePadding(),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
