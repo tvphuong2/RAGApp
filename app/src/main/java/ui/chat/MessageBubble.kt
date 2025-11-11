@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,10 +35,16 @@ fun MessageBubble(
     modifier: Modifier = Modifier
 ) {
     val isUser = message.author == Author.USER
-    val bubbleColor = if (isUser)
+    val bubbleColor = if (isUser) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
         MaterialTheme.colorScheme.surfaceVariant
-    else
-        MaterialTheme.colorScheme.primaryContainer
+    }
+    val textColor = if (isUser) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -48,33 +55,36 @@ fun MessageBubble(
             Box(
                 modifier = Modifier
                     .widthIn(max = 320.dp)            // giới hạn chiều rộng bong bóng
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(18.dp))
                     .background(bubbleColor)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
-                Text(
-                    text = message.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Start
-                )
-            }
-
-            if (!isUser) {
-                val info = buildList {
-                    message.firstTokenLatencyMs?.let { latency ->
-                        add(formatLatency(latency))
-                    }
-                    message.tokensPerSecond?.let { rate ->
-                        add(String.format(Locale.getDefault(), "Tốc độ: %.1f tokens/s", rate))
-                    }
-                }
-                if (info.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = info.joinToString(" • "),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(top = 4.dp)
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor,
+                        textAlign = TextAlign.Start
                     )
+
+                    if (!isUser) {
+                        val info = buildList {
+                            message.firstTokenLatencyMs?.let { latency ->
+                                add(formatLatency(latency))
+                            }
+                            message.tokensPerSecond?.let { rate ->
+                                add(String.format(Locale.getDefault(), "Tốc độ: %.1f tokens/s", rate))
+                            }
+                        }
+                        if (info.isNotEmpty()) {
+                            Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                            Text(
+                                text = info.joinToString(" • "),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
                 }
             }
         }

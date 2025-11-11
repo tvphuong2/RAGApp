@@ -15,11 +15,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,7 +53,8 @@ fun ChatScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .systemBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         PresetSelector(
@@ -79,8 +80,8 @@ fun ChatScreen(
             onSend = viewModel::sendMessage,
             onStop = viewModel::stopGeneration,
             canSend = uiState.input.isNotBlank() && uiState.isModelReady && !uiState.isGenerating,
-            canStop = uiState.isGenerating,
-            enabled = uiState.isModelReady && !uiState.isGenerating
+            isGenerating = uiState.isGenerating,
+            isModelReady = uiState.isModelReady
         )
     }
 }
@@ -149,7 +150,7 @@ private fun ChatHistory(
                 modifier = Modifier.align(Alignment.Center),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             LazyColumn(
@@ -173,8 +174,8 @@ private fun InputBar(
     onSend: () -> Unit,
     onStop: () -> Unit,
     canSend: Boolean,
-    canStop: Boolean,
-    enabled: Boolean,
+    isGenerating: Boolean,
+    isModelReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -184,19 +185,24 @@ private fun InputBar(
                 onValueChange = onInputChange,
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Nhập câu hỏi...") },
-                enabled = enabled
+                enabled = isModelReady
             )
             Spacer(Modifier.width(12.dp))
-            Button(onClick = onSend, enabled = canSend) {
-                Text("Gửi")
+            val buttonLabel = if (isGenerating) "Dừng" else "Gửi"
+            val buttonEnabled = isModelReady && (isGenerating || canSend)
+            val onClick = if (isGenerating) onStop else onSend
+            val buttonColors = if (isGenerating) {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            } else {
+                ButtonDefaults.buttonColors()
             }
-        }
-        OutlinedButton(
-            onClick = onStop,
-            enabled = canStop,
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text("Dừng")
+
+            Button(onClick = onClick, enabled = buttonEnabled, colors = buttonColors) {
+                Text(buttonLabel)
+            }
         }
     }
 }
